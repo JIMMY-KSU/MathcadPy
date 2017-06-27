@@ -22,6 +22,7 @@ Project aim is a package release on PyPi.
 
 ### licensing and credits
 Author: Matt Woodhead
+
 MathcadPy is licensed under the GPLv3
 
 ```
