@@ -13,8 +13,6 @@ Python Win 32 extensions (https://sourceforge.net/projects/pywin32/)
 
 import win32com.client as win32
 
-global PROGID
-PROGID = "MathcadPrime.Application"
 
 class Mathcad(object):
     """ top level wapper class """
