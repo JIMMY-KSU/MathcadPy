@@ -16,16 +16,13 @@ def open_mathcad():
 def open_mathcad2():
     #mathcad = win32.gencache.EnsureDispatch("Ptc_MathcadPrime_Automation.Application")
     import comtypes.client as CC
-    import comtypes
 
-    ccHandle = CC.CreateObject("Ptc_MathcadPrime_Automation.Application")
-    ccHandle = CC.CreateObject("Mathcad.Application")
+    ccHandle = CC.CreateObject("MathcadPrime.Application")
     print (ccHandle)
-    import comtypes.gen.CSharpServer as CS
-    InterfaceHandle = ccHandle.QueryInterface(CS.IManagedInterface)
+    ccHandle.Worksheet
 
-    print ("output of PrintHi function = ", InterfaceHandle.PrintHi("World"))
 
 #open_word()
-
 open_mathcad()
+print("\n\n")
+open_mathcad2()
