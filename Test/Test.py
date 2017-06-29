@@ -44,5 +44,13 @@ def register_mathcad_com():
         print("COM error")
         return None
 
-a = register_mathcad_com()
-print(a)
+mcad_methods = register_mathcad_com()
+#print(mcad_methods)
+WS = pythoncom.MakePyFactory(mcad_methods["Worksheet"])
+#win32.gencache.EnsureDispatch(mcad_methods["Worksheet"])
+
+OUT = pythoncom.MakePyFactory(mcad_methods["Outputs"])
+
+#for k, v in mcad_methods.items():
+#    if pythoncom.IsGatewayRegistered(v):
+#        print(k)
