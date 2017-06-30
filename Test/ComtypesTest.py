@@ -6,10 +6,14 @@ Author: MattWoodhead
 """
 
 import comtypes.client as CC
+import Mathcad_Automation as MC
 
-def open_mathcad():
-    ccHandle = CC.CreateObject("MathcadPrime.Application")
-    print (ccHandle)
-    ccHandle.Worksheet
 
-open_mathcad()
+#tlbpath = r"C:\Program Files\PTC\Mathcad Prime 3.1\Ptc.MathcadPrime.Automation.tlb"
+#mcad = CC.GetModule(tlbpath)
+#print(mcad)
+#
+#MC.Application.
+
+a = MC.Application()
+a.Visible = True
