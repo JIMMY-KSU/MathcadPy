@@ -7,6 +7,7 @@ Author: MattWoodhead
 import comtypes.client as CC
 import win32com.client as win32
 import pythoncom
+import os
 
 def open_mathcad():
     print(win32.gencache.EnsureModule("MathcadPrime.Application", 0, 1, 2))
@@ -34,15 +35,22 @@ def register_mathcad_com():
             obj = mcad.GetDocumentation(i)[0]  # COM object name
             CLSID = mcad.GetTypeInfo(i).GetTypeAttr().iid.__str__()  # CLSID
             methods[obj] = CLSID
+        print("\nRegistered:")
+        for k, v in methods.items():
+            if pythoncom.IsGatewayRegistered(v):
+                print(k)
         return methods
     except pythoncom.com_error:
         print("COM error")
         return None
 
-mcad_methods = register_mathcad_com()
+register_mathcad_com()
 
-print(mcad_methods)
+def attempt_cast_coclass():
+    mcad = win32.Dispatch("MathcadPrime.Application")
+    mcad.Visible = True
+    mcad.Open(os.path.join(os.getcwd(), "test.mcdx"))
+    Outputs = win32com.client.CastTo(mcad, "Outputs")
+    print(Outputs.Count)
 
-for k, v in mcad_methods.items():
-    if pythoncom.IsGatewayRegistered(v):
-        print(k)
+attempt_cast_coclass()
