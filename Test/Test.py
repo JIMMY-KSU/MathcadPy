@@ -46,11 +46,21 @@ def register_mathcad_com():
 
 register_mathcad_com()
 
-def attempt_cast_coclass():
+def attempt_cast_dispatch():
     mcad = win32.Dispatch("MathcadPrime.Application")
     mcad.Visible = True
     mcad.Open(os.path.join(os.getcwd(), "test.mcdx"))
     Outputs = win32.CastTo(mcad, "IMathcadPrimeOutputs")
+    print(Outputs.Count)
+
+attempt_cast_dispatch()
+
+
+def attempt_cast_coclass():
+    mcad = win32.Dispatch("MathcadPrime.Application")
+    mcad.Visible = True
+    mcad.Open(os.path.join(os.getcwd(), "test.mcdx"))
+    Outputs = win32.CastTo(mcad, "Inputs - CoClass")
     print(Outputs.Count)
 
 attempt_cast_coclass()
