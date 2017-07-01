@@ -50,7 +50,7 @@ def attempt_cast_coclass():
     mcad = win32.Dispatch("MathcadPrime.Application")
     mcad.Visible = True
     mcad.Open(os.path.join(os.getcwd(), "test.mcdx"))
-    Outputs = win32com.client.CastTo(mcad, "Outputs")
+    Outputs = win32.CastTo(mcad, "IMathcadPrimeOutputs")
     print(Outputs.Count)
 
 attempt_cast_coclass()
