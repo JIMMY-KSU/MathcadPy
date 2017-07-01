@@ -1,12 +1,13 @@
 # -*- coding: mbcs -*-
 typelib_path = 'C:\\Program Files\\PTC\\Mathcad Prime 3.1\\Ptc.MathcadPrime.Automation.tlb'
 _lcid = 0 # change this if required
-from ctypes import *
+#from ctypes import *
+from ctypes import POINTER, c_double, c_int
 import comtypes.gen._00020430_0000_0000_C000_000000000046_0_2_0
 from comtypes import GUID
 from ctypes import HRESULT
 from comtypes import BSTR
-from comtypes import helpstring
+#from comtypes import helpstring
 from comtypes import COMMETHOD
 from comtypes import dispid
 from ctypes.wintypes import VARIANT_BOOL
@@ -183,27 +184,27 @@ IMathcadPrimeWorksheet2._methods_ = [
 ##
 ##    def SetTitle(self, titleArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Save(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def SaveAs(self, newDocumentPathArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Synchronize(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def PauseCalculation(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def ResumeCalculation(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def SetRealValue(self, aliasArg, valueArg, unitsArg):
 ##        '-no docstring-'
@@ -257,11 +258,11 @@ IMathcadPrimeWorksheet2._methods_ = [
 ##
 ##    def Activate(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Close(self, saveOptionArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 
 class IMathcadPrimeInputsOutputsStates(comtypes.gen._00020430_0000_0000_C000_000000000046_0_2_0.IDispatch):
@@ -485,39 +486,39 @@ IMathcadPrimeEvents2._methods_ = [
 ##class IMathcadPrimeEvents2_Impl(object):
 ##    def OnWorksheetSaved(self, documentFullNameArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def OnWorksheetClosed(self, documentFullNameArg, documentNameArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def OnWorksheetModified(self, documentFullNameArg, documentNameArg, isModifiedArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def OnWorksheetRenamed(self, previousFullNameArg, currentFullNameArg, previousDocNameArg, currentDocNameArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def OnWorksheetInputsOutputsSelected(self, documentFullNameArg, documentNameArg, inputsArg, outputsArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def OnExit(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def OnWorksheetStatesGenerated(self, documentFullNameArg, documentNameArg, operationsArg, itemsStatesArg, conflictsArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def OnWorksheetStatesGenerating(self, documentFullNameArg, documentNameArg, operationsArg, itemsStatesArg, conflictsArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def OnWorksheetRequestToUpdateInputs(self, documentFullNameArg, documentNameArg, setterArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 
 class ApplicationObsolete(CoClass):
@@ -588,19 +589,19 @@ IMathcadPrimeInputsOutputsConflicts._methods_ = [
 ##class IMathcadPrimeInputsOutputsConflicts_Impl(object):
 ##    def AddGeneralWarning(self, warningArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def AddGeneralError(self, errorArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def AddItemWarning(self, aliasArg, warningArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def AddItemError(self, aliasArg, errorArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 
 
@@ -656,15 +657,15 @@ IMathcadPrimeEvents._methods_ = [
 ##class IMathcadPrimeEvents_Impl(object):
 ##    def OnSelect(self, inputsOnSelectArg, outputsOnSelectArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def OnSave(self, documentNameArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def OnExit(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 
 
@@ -789,11 +790,11 @@ IMathcadPrimeApplication._methods_ = [
 ##
 ##    def Activate(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Quit(self, saveOptionArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def ActiveWorksheet(self):
@@ -853,19 +854,19 @@ IMathcadPrimeValuesSetter._methods_ = [
 ##class IMathcadPrimeValuesSetter_Impl(object):
 ##    def AddScalarValue(self, aliasArg, valueArg, unitsArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def AddMatrixValue(self, aliasArg, valueArg, unitsArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def AddStringValue(self, aliasArg, valueArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def AddSExprValue(self, aliasArg, sexpressionArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def SetValues(self, secondsArg):
 ##        '-no docstring-'
@@ -980,11 +981,11 @@ IMathcadPrimeApplication2._methods_ = [
 ##
 ##    def Activate(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Quit(self, saveOptionArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def ActiveWorksheet(self):
@@ -1006,7 +1007,7 @@ IMathcadPrimeApplication2._methods_ = [
 ##
 ##    def CloseAll(self, saveOptionArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def GetVersion(self):
 ##        '-no docstring-'
@@ -1157,27 +1158,27 @@ IMathcadPrimeWorksheet3._methods_ = [
 ##
 ##    def SetTitle(self, titleArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Save(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def SaveAs(self, newDocumentPathArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Synchronize(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def PauseCalculation(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def ResumeCalculation(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def SetRealValue(self, aliasArg, valueArg, unitsArg):
 ##        '-no docstring-'
@@ -1231,11 +1232,11 @@ IMathcadPrimeWorksheet3._methods_ = [
 ##
 ##    def Activate(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Close(self, saveOptionArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def GetTitle(self):
 ##        '-no docstring-'
@@ -1412,11 +1413,11 @@ IMathcadPrimeApplication3._methods_ = [
 ##
 ##    def Activate(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Quit(self, saveOptionArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def ActiveWorksheet(self):
@@ -1438,7 +1439,7 @@ IMathcadPrimeApplication3._methods_ = [
 ##
 ##    def CloseAll(self, saveOptionArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def GetVersion(self):
 ##        '-no docstring-'
@@ -1594,27 +1595,27 @@ IMathcadPrimeWorksheet._methods_ = [
 ##
 ##    def SetTitle(self, titleArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Save(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def SaveAs(self, newDocumentPathArg):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Synchronize(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def PauseCalculation(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def ResumeCalculation(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def SetRealValue(self, aliasArg, valueArg, unitsArg):
 ##        '-no docstring-'
