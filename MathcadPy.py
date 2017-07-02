@@ -7,7 +7,7 @@ Author: MattWoodhead
 Requirements:
 
 Mathcad Prime
-Python Win 32 extensions (https://sourceforge.net/projects/pywin32/)
+comtypes (https://github.com/enthought/comtypes)
 
 """
 
@@ -15,14 +15,17 @@ import os
 
 try:  # Check that dependencies are importable
     import comtypes.client as CC
+    import numpy as np
 except:
-    print("The comtypes module is required")
+    print("Not all required dependencies are installed")
+    print("comtypes and numpy are required")
     quit()  # Stop script
 
 
 class Mathcad(object):
     """ Mathcad application object """
     def __init__(self, visible=False):
+        print("Loading Mathcad")
         try:
             self.__mcadapp = CC.CreateObject("MathcadPrime.Application")
             self.version = self.__mcadapp.GetVersion()  # Fetches Mathcad version
@@ -93,23 +96,7 @@ class Worksheet(object):
                 except:
                     print(f"Error opening {filepath}")
 
-    def name(self):
-        """ Returns the filename of the Worksheet object """
-        return self.__obj.Name
-
-    def inputs(self):
-        """ returns a list of the designated input fields in the worksheet """
-        _inputs = []
-        for i in range(self.__obj.Inputs.Count):  # no. of open sheets
-            _inputs.append(self.__obj.Inputs.GetAliasByIndex(i))
-        return _inputs  # Returns a list of open worksheet filenames
-
-    def outputs(self):
-        """ returns a list of the designated output fields in the worksheet """
-        _outputs = []
-        for i in range(self.__obj.Outputs.Count):
-            _outputs.append(self.__obj.Outputs.GetAliasByIndex(i))
-        return _outputs  # Returns a list of open worksheet filenames
+    # ~~~~~~~~~~~~~~~~~~~~~~~ File Operations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def activate(self):
         """ activates the worksheet object """
@@ -127,8 +114,68 @@ class Worksheet(object):
             print("incorrect save argument specified")
 
     def save_as(self):
+        """ Saves the worksheet under a new filename """
         pass
         self.Name = self.__mcadapp.ActiveWorksheet.Name
+
+    def name(self):
+        """ Returns the filename of the Worksheet object """
+        return self.__obj.Name
+
+    def readonly(self, setreadonly=None):
+        """ Returns (and can optionally set) the worksheets read only status """
+        if setreadonly is True:  # If readonly has been set to True
+            self.__obj.IsReadOnly = True
+        elif setreadonly is False: # If readonly has been set to False
+            self.__obj.IsReadOnly = False
+        return self.__obj.IsReadOnly  # Always return state
+
+    def modified(self, setmodfied=None):
+        """ Returns (and can optionally set) the worksheets modified status """
+        if setmodfied is True:  # If readonly has been set to True
+            self.__obj.Modified = True
+        elif setmodfied is False: # If readonly has been set to False
+            self.__obj.Modified = False
+        return self.__obj.Modified  # Always return state
+
+    # ~~~~~~~~~~~~~~~~~~~~~ Worksheet Operations ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def pause_calculation(self):
+        """ Pauses worksheet calculation """
+        self.__obj.PauseCalculation()
+
+    def resume_calculation(self):
+        """ Resumes the worksheets calculation """
+        self.__obj.ResumeCalculation()
+
+    def inputs(self):
+        """ returns a list of the designated input fields in the worksheet """
+        _inputs = []
+        for i in range(self.__obj.Inputs.Count):  # no. of open sheets
+            _inputs.append(self.__obj.Inputs.GetAliasByIndex(i))
+        return _inputs  # Returns a list of open worksheet filenames
+
+    def outputs(self):
+        """ returns a list of the designated output fields in the worksheet """
+        _outputs = []
+        for i in range(self.__obj.Outputs.Count):
+            _outputs.append(self.__obj.Outputs.GetAliasByIndex(i))
+        return _outputs  # Returns a list of open worksheet filenames
+
+    def create_matrix(self, rows, cols):
+        """ Creates an empty Mathcad matrix of dimensions cols*rows """
+        matrix_object = Matrix(rows, cols)
+
+        return matrix_object
+
+    def numpy_array_as_matrix(self, numpy_array):
+        """ Takes a numpy array, creates a matrix, and populates the values """
+        if isinstance(a, np.ndarray):
+            height, width = numpy_array.shape  # Get array dimensions
+            matrix = Matrix(height, width)
+
+        else:
+            print("Argument is not a Numpy array")
 
     def set_real_input(self, input_alias, value, units=""):
         """ Set the value of a numerical input range in the worksheet """
@@ -143,13 +190,67 @@ class Worksheet(object):
                   f"Check the '{self.__mcadapp.ActiveWorksheet.Name}' worksheet\n")
         return error
 
+    def set_string_input(self, input_alias, string):
+        """ Set the value of a numerical input range in the worksheet """
+        if input_alias in self.inputs():  # Use inputs function to get list
+            error = self.__obj.SetStringValue(str(input_alias), str(string))
+            # COM command returns error count. 0 = everything set correctly
+        else:
+            print(f"{input_alias} is not a designated input field.\n\n" +
+                  f"Available Input fields:\n{self.inputs()}")
+        if error > 0:
+            print(f"\nWarning!\nerror setting '{input_alias}' string\n" +
+                  f"Check the '{self.__mcadapp.ActiveWorksheet.Name}' worksheet\n")
+        return error
+
+
+class Matrix(object):
+    """ Mathcad Matrix object container """
+    # Keeps methods inside Matrix for OOP
+    def __init__(self, python_name=""):
+        self.__mcadapp = CC.CreateObject("MathcadPrime.Application")
+        self.__ws = self.__mcadapp.ActiveWorksheet
+        self.python_name = python_name  # Just for organisation in scripts
+        self.object = None
+
+    def create_matrix(self, rows, columns):
+        """ Creates a Mathcad matrix """
+        try:
+            rows, columns = int(rows), int(columns)
+            self.shape = (self.rows, self.columns)
+            self.object = self.__ws.CreateMatrix(rows, columns)
+            return self.object
+        except ValueError:
+            raise ValueError("Matrix dimensions must be integers")
+        except:
+            raise Exception("COM Error creating Mathcad matrix")
+
+    def set_element(self, row_index, column_index, value):
+        if self.object is not None:
+            try:
+                row, col = int(row_index), int(column_index)
+                self.object.SetMatrixElement(row, col, value)
+            except ValueError:
+                raise ValueError("Matrix dimensions must be integers")
+            except:
+                raise Exception("COM Error setting element value")
+        else:
+            raise TypeError("Matrix must first be created")
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
 
     TEST = os.path.join(os.getcwd(), "Test", "test.mcdx")
     MC = Mathcad(visible=True) # Open Mathcad with no GUI
     WS = Worksheet(TEST)
-    print(WS.inputs())
-    print(WS.outputs())
-    a = WS.set_real_input("in_test", 2, "Blah")
+    a = WS.set_real_input("in_test", 2, "mm")
     print(a)
+    print(WS.is_readonly())

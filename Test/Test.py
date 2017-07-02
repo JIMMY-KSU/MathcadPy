@@ -4,62 +4,13 @@ MathcadPy.py
 
 Author: MattWoodhead
 """
-import win32com.client as win32
-import pythoncom
-import os
+import numpy as np
 
-def open_mathcad():
-    print(win32.gencache.EnsureModule("MathcadPrime.Application", 0, 1, 2))
-    mcad = win32.Dispatch("MathcadPrime.Application")
-    mcad.Visible = True
+a = np.array([[1, 2], [3, 4], [5, 6]])
 
-#open_mathcad()
-#print("\n\n")
+height, width = a.shape
 
-def open_mathcad2():
-    mcad = win32.Dispatch("{A24EB614-A183-400F-8207-1E58D61945D6}")
-    mcad.Visible = True
+print(isinstance(a, np.ndarray))
 
-open_mathcad2()
+print(f"Height = {height}\nWidth = {width}")
 
-def register_mathcad_com():
-    methods = {}
-    try:
-        tlbpath = r"C:\Program Files\PTC\Mathcad Prime 3.1\Ptc.MathcadPrime.Automation.tlb"
-        mcad = pythoncom.LoadTypeLib(tlbpath)
-        pythoncom.RegisterTypeLib(mcad, tlbpath)
-        for i in range(mcad.GetTypeInfoCount()):
-            obj = mcad.GetDocumentation(i)[0]  # COM object name
-            CLSID = mcad.GetTypeInfo(i).GetTypeAttr().iid.__str__()  # CLSID
-            methods[obj] = CLSID
-        print("\nRegistered:")
-        for k, v in methods.items():
-            if pythoncom.IsGatewayRegistered(v):
-                print(k)
-        return methods
-    except pythoncom.com_error:
-        print("COM error")
-        return None
-
-#register_mathcad_com()
-
-def attempt_cast_dispatch():
-    mcad = win32.Dispatch("MathcadPrime.Application")
-    mcad.Visible = True
-    mcad.Open(os.path.join(os.getcwd(), "test.mcdx"))
-    Outputs = win32.CastTo(mcad, "IMathcadPrimeOutputs")
-    print(Outputs.Count)
-
-#attempt_cast_dispatch()
-
-
-def attempt_cast_coclass():
-    print("loading Mathcad")
-    mcad = win32.Dispatch("MathcadPrime.Application")
-    print("Done")
-    mcad.Visible = True
-    mcad.Open(os.path.join(os.getcwd(), "test.mcdx"))
-    Outputs = win32.CastTo(mcad, "Inputs - CoClass")
-    print(Outputs.Count)
-
-#attempt_cast_coclass()
