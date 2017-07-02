@@ -4,7 +4,6 @@ MathcadPy.py
 
 Author: MattWoodhead
 """
-import comtypes.client as CC
 import win32com.client as win32
 import pythoncom
 import os
@@ -15,15 +14,13 @@ def open_mathcad():
     mcad.Visible = True
 
 #open_mathcad()
-
 #print("\n\n")
 
 def open_mathcad2():
-    ccHandle = CC.CreateObject("Ptc_MathcadPrime_Automation")
-    print(ccHandle)
-    ccHandle.Worksheet
+    mcad = win32.Dispatch("{A24EB614-A183-400F-8207-1E58D61945D6}")
+    mcad.Visible = True
 
-#open_mathcad2()
+open_mathcad2()
 
 def register_mathcad_com():
     methods = {}
@@ -46,13 +43,13 @@ def register_mathcad_com():
 
 #register_mathcad_com()
 
-#def attempt_cast_dispatch():
-#    mcad = win32.Dispatch("MathcadPrime.Application")
-#    mcad.Visible = True
-#    mcad.Open(os.path.join(os.getcwd(), "test.mcdx"))
-#    Outputs = win32.CastTo(mcad, "IMathcadPrimeOutputs")
-#    print(Outputs.Count)
-#
+def attempt_cast_dispatch():
+    mcad = win32.Dispatch("MathcadPrime.Application")
+    mcad.Visible = True
+    mcad.Open(os.path.join(os.getcwd(), "test.mcdx"))
+    Outputs = win32.CastTo(mcad, "IMathcadPrimeOutputs")
+    print(Outputs.Count)
+
 #attempt_cast_dispatch()
 
 
@@ -65,4 +62,4 @@ def attempt_cast_coclass():
     Outputs = win32.CastTo(mcad, "Inputs - CoClass")
     print(Outputs.Count)
 
-attempt_cast_coclass()
+#attempt_cast_coclass()

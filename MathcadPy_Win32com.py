@@ -40,7 +40,7 @@ class Mathcad(object):
     """ Top level Mathcad wapper class """
     def __init__(self, visible=False):
         try:
-            self.__mcadapp = win32.Dispatch("MathcadPrime.Application")
+            self.__mcadapp = win32.gencache.EnsureDispatch("MathcadPrime.Application")
             self.version = self.__mcadapp.GetVersion()  # Fetches Mathcad version
             if visible is False:
                 self.__mcadapp.Visible = False
@@ -79,35 +79,38 @@ class Mathcad(object):
 class Worksheet(object):
     """ Mathcad Worksheet class """
     def __init__(self, filepath=None):
-        self.__mcadapp = win32.Dispatch("MathcadPrime.Application")
-        self.worksheet = win32.CastTo(self.__mcadapp, "IMathcadPrimeWorksheet3")
-        self.name = self.worksheet.FullName
+        self.__mcadapp = win32.gencache.EnsureDispatch("MathcadPrime.Application")
+        self.__worksheet = win32.CastTo(self.__mcadapp, "IMathcadPrimeWorksheet3")
         if filepath is not None:
             try:
-                self.worksheet.Open(filepath)
+                self.__mcadapp.Open(filepath)
             except:
                 print("error opening file")
+        self.name = self.__worksheet.Name
 
     def activate(self):
         """ activates the worksheet object """
-        self.worksheet.Activate
+        self.__worksheet.Activate()
 
-    def Open(self, filepath):
+    def IsOpen(self):
         """ Opens a worksheet file """
-        try:
-            self.worksheet.Open(filepath)
-        except:
-            print("error opening file")
+        return self.__worksheet.IsOpen()
 
-    def Close(self):
+    def Close(self, save_option="Discard"):
         """ Closes the worksheet """
-        self.worksheet.Close()
+        if save_option in ["Discard", 2]:
+            self.__worksheet.CloseAll(2)
+        elif save_option in ["Prompt", 1]:
+            self.__worksheet.CloseAll(1)
+        elif save_option in ["Save", 0]:
+            self.__worksheet.CloseAll(0)
+        else:
+            print("incorrect save argument specified")
 
     def set_real_input(self, input_alias, value, units):
         """ Set the value of a numerical input range in the worksheet """
         if input_alias in self.worksheet.Inputs:
             self.worksheet.SetRealValue(str(input_alias), value, str(units))
-
 
 
 if __name__ == "__main__":
@@ -117,11 +120,9 @@ if __name__ == "__main__":
     test = os.path.join(os.getcwd(), "Test", "test.mcdx")
 
     print("Example usage")
-    MC = Mathcad(visible=True)  # Open Mathcad with no GUI
+    MC = Mathcad(visible=False)  # Open Mathcad with no GUI
     print(MC.active_sheet())  # Print the name of the active sheet
     MC.activate()
     print(MC.version)
     WS = Worksheet(test)
-
-    for i in range(WS.GetTypeInfoCount()):
-        print(WS.GetDocumentation(i)[0])
+    print(WS.IsOpen())
