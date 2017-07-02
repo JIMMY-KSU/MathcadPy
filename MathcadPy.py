@@ -134,12 +134,8 @@ class Worksheet(object):
         """ Returns the filename of the Worksheet object """
         return self.__obj.Name
 
-    def readonly(self, setreadonly=None):
-        """ Returns (and can optionally set) the worksheets read only status """
-        if setreadonly is True:  # If readonly has been set to True
-            self.__obj.IsReadOnly = True
-        elif setreadonly is False: # If readonly has been set to False
-            self.__obj.IsReadOnly = False
+    def readonly(self):
+        """ Returns the worksheets read only status """
         return self.__obj.IsReadOnly  # Always return state
 
     def modified(self, setmodfied=None):
@@ -160,10 +156,6 @@ class Worksheet(object):
         """ Resumes the worksheets calculation """
         self.__obj.ResumeCalculation()
 
-    def get_input(self, input_alias):
-        getinput = self.__obj.InputGetRealValue(input_alias)
-        return getinput.RealResult, getinput.Units, getinput.ErrorCode
-
     def inputs(self):
         """ returns a list of the designated input fields in the worksheet """
         _inputs = []
@@ -171,17 +163,22 @@ class Worksheet(object):
             _inputs.append(self.__obj.Inputs.GetAliasByIndex(i))
         return _inputs  # Returns a list of open worksheet filenames
 
+    def get_input(self, input_alias):
+        """ Fetches the curent value of a specific input """
+        if input_alias in self.inputs():
+            getinput = self.__obj.InputGetRealValue(input_alias)
+            return getinput.RealResult, getinput.Units, getinput.ErrorCode
+        else:
+            raise ValueError(f"{input_alias} is not a designated input field" +
+                             f"\n\nAvailable Input fields:\n{self.inputs()}")
+            return False
+
     def outputs(self):
         """ returns a list of the designated output fields in the worksheet """
         _outputs = []
         for i in range(self.__obj.Outputs.Count):
             _outputs.append(self.__obj.Outputs.GetAliasByIndex(i))
         return _outputs  # Returns a list of open worksheet filenames
-
-    def create_matrix(self, rows, cols):
-        """ Creates an empty Mathcad matrix of dimensions cols*rows """
-        matrix_object = Matrix().create_matrix(rows, cols)
-        return matrix_object
 
     def set_real_input(self, input_alias, value, units=""):
         """ Set the value of a numerical input range in the worksheet """
@@ -226,8 +223,6 @@ class Worksheet(object):
 
 class Matrix(object):
     """ Mathcad Matrix object container """
-
-    # Keeps methods inside Matrix class for OOP
     def __init__(self, python_name=""):
         self.__mcadapp = CC.CreateObject("MathcadPrime.Application")
         for i in range(self.__mcadapp.Worksheets.Count):
@@ -243,21 +238,38 @@ class Matrix(object):
             rows, columns = int(rows), int(columns)
             self.shape = (rows, columns)
             self.object = self.__ws.CreateMatrix(rows, columns)
-            return self.object
+            return True
         except ValueError:
             raise ValueError("Matrix dimensions must be integers")
+            return False
         except:
             raise Exception("COM Error creating Mathcad matrix")
+            return False
 
     def set_element(self, row_index, column_index, value):
+        """ Sets the value of an element in the Matrix """
         if self.object is not None:
             try:
                 row, col = int(row_index), int(column_index)
-                self.object.SetMatrixElement(row, col, value)
+                print(self.object)
+                self.object.SetMatrixElement(row, col, value)  # @FIXME
             except ValueError:
-                raise ValueError("Matrix dimensions must be integers")
+                raise ValueError("Matrix maths can only use numerical values")
 #            except:
-#                raise Exception("COM Error setting element value")
+#                raise Exception("COM Error setting element value")  # Hidden for above @FIXME
+        else:
+            raise TypeError("Matrix must first be created")
+
+    def get_element(self, row_index, column_index):
+        """ Fetches the value of an element in the Matrix """
+        if self.object is not None:
+            try:
+                row, col = int(row_index), int(column_index)
+                self.object.GetMatrixElement(row, col)
+            except ValueError:
+                raise ValueError("Matrix maths can only use numerical values")
+            except:
+                raise Exception("COM Error fetching element value")
         else:
             raise TypeError("Matrix must first be created")
 
@@ -265,12 +277,11 @@ class Matrix(object):
         """ Takes a numpy array, creates a matrix, and populates the values """
         if isinstance(numpy_array, np.ndarray):
             height, width = numpy_array.shape  # Get array dimensions
-            matrix_object = self.create_matrix(width, height)
-            self.object = matrix_object
-            for r, row in enumerate(numpy_array):
-                for c, value in enumerate(row):
-                    print(f"row={r}   col={c}   value={value}")
-                    self.set_element(r+1, c+1, value)
+            matrix = self.create_matrix(width, height)
+            if matrix is True:
+                for r, row in enumerate(numpy_array):
+                    for c, value in enumerate(row):
+                        self.set_element(r, c, value)
         else:
             raise TypeError("Argument is not a Numpy array")
 
@@ -283,5 +294,8 @@ if __name__ == "__main__":
     a = WS.set_real_input("in_test", 2, "mm")
     print(a)
     nparray = np.array([[1, 2],[3,4],[5,6]])
-    matrix = Matrix().numpy_array_as_matrix(nparray)
+    matrix = Matrix()
+    a = matrix.numpy_array_as_matrix(nparray)
+    print(a)
+
 
