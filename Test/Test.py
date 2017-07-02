@@ -6,11 +6,11 @@ Author: MattWoodhead
 """
 import numpy as np
 
-a = np.array([[1, 2], [3, 4], [5, 6]])
+array = np.array([[1, 2], [3, 4]])
 
-height, width = a.shape
+height, width = array.shape
 
-print(isinstance(a, np.ndarray))
+print(isinstance(array, np.ndarray))
 
 print(f"Height = {height}\nWidth = {width}")
 

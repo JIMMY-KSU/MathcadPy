@@ -164,18 +164,8 @@ class Worksheet(object):
 
     def create_matrix(self, rows, cols):
         """ Creates an empty Mathcad matrix of dimensions cols*rows """
-        matrix_object = Matrix(rows, cols)
-
+        matrix_object = Matrix.create_matrix(rows, cols)
         return matrix_object
-
-    def numpy_array_as_matrix(self, numpy_array):
-        """ Takes a numpy array, creates a matrix, and populates the values """
-        if isinstance(a, np.ndarray):
-            height, width = numpy_array.shape  # Get array dimensions
-            matrix = Matrix(height, width)
-
-        else:
-            print("Argument is not a Numpy array")
 
     def set_real_input(self, input_alias, value, units=""):
         """ Set the value of a numerical input range in the worksheet """
@@ -183,8 +173,8 @@ class Worksheet(object):
             error = self.__obj.SetRealValue(str(input_alias), value, str(units))
             # COM command returns error count. 0 = everything set correctly
         else:
-            print(f"{input_alias} is not a designated input field.\n\n" +
-                  f"Available Input fields:\n{self.inputs()}")
+            raise ValueError(f"{input_alias} is not a designated input field" +
+                             f"\n\nAvailable Input fields:\n{self.inputs()}")
         if error > 0:
             print(f"\nWarning!\nerror setting '{input_alias}' value/units\n" +
                   f"Check the '{self.__mcadapp.ActiveWorksheet.Name}' worksheet\n")
@@ -196,17 +186,32 @@ class Worksheet(object):
             error = self.__obj.SetStringValue(str(input_alias), str(string))
             # COM command returns error count. 0 = everything set correctly
         else:
-            print(f"{input_alias} is not a designated input field.\n\n" +
-                  f"Available Input fields:\n{self.inputs()}")
+            raise ValueError(f"{input_alias} is not a designated input field" +
+                             f"\n\nAvailable Input fields:\n{self.inputs()}")
         if error > 0:
-            print(f"\nWarning!\nerror setting '{input_alias}' string\n" +
+            print(f"\nWarning!\nerror setting '{input_alias}' value/units\n" +
+                  f"Check the '{self.__mcadapp.ActiveWorksheet.Name}' worksheet\n")
+        return error
+
+    def set_matrix_input(self, input_alias, matrix_object, units=""):
+        """ Set the value of a numerical input range in the worksheet """
+        if input_alias in self.inputs():  # Use inputs function to get list
+            error = self.__obj.SetRealValue(str(input_alias),
+                                            matrix_object, str(units))
+            # COM command returns error count. 0 = everything set correctly
+        else:
+            raise ValueError(f"{input_alias} is not a designated input field" +
+                             f"\n\nAvailable Input fields:\n{self.inputs()}")
+        if error > 0:
+            print(f"\nWarning!\nerror setting '{input_alias}' value/units\n" +
                   f"Check the '{self.__mcadapp.ActiveWorksheet.Name}' worksheet\n")
         return error
 
 
 class Matrix(object):
     """ Mathcad Matrix object container """
-    # Keeps methods inside Matrix for OOP
+
+    # Keeps methods inside Matrix class for OOP
     def __init__(self, python_name=""):
         self.__mcadapp = CC.CreateObject("MathcadPrime.Application")
         self.__ws = self.__mcadapp.ActiveWorksheet
@@ -217,13 +222,14 @@ class Matrix(object):
         """ Creates a Mathcad matrix """
         try:
             rows, columns = int(rows), int(columns)
-            self.shape = (self.rows, self.columns)
+            self.shape = (rows, columns)
+            #print(self.__ws.Name)
             self.object = self.__ws.CreateMatrix(rows, columns)
             return self.object
         except ValueError:
             raise ValueError("Matrix dimensions must be integers")
-        except:
-            raise Exception("COM Error creating Mathcad matrix")
+#        except:
+#            raise Exception("COM Error creating Mathcad matrix")
 
     def set_element(self, row_index, column_index, value):
         if self.object is not None:
@@ -237,20 +243,25 @@ class Matrix(object):
         else:
             raise TypeError("Matrix must first be created")
 
-
-
-
-
-
-
-
+    def numpy_array_as_matrix(self, numpy_array):
+        """ Takes a numpy array, creates a matrix, and populates the values """
+        if isinstance(numpy_array, np.ndarray):
+            height, width = numpy_array.shape  # Get array dimensions
+            matrix_object = self.create_matrix(height, width)
+            self.object = matrix_object
+            for r, row in enumerate(numpy_array):
+                for c, value in enumerate(row):
+                    self.set_element(r, c, value)
+        else:
+            raise TypeError("Argument is not a Numpy array")
 
 
 if __name__ == "__main__":
-
     TEST = os.path.join(os.getcwd(), "Test", "test.mcdx")
     MC = Mathcad(visible=True) # Open Mathcad with no GUI
     WS = Worksheet(TEST)
     a = WS.set_real_input("in_test", 2, "mm")
     print(a)
-    print(WS.is_readonly())
+    print(WS.readonly())
+    array = np.array([[1, 2], [3, 4]])
+    matrix = Matrix().numpy_array_as_matrix(array)
