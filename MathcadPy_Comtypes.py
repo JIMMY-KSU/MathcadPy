@@ -106,10 +106,10 @@ class Worksheet(object):
 
     def outputs(self):
         """ returns a list of the designated output fields in the worksheet """
-        outputs = []
+        _outputs = []
         for i in range(self.__obj.Outputs.Count):
-            outputs.append(self.__obj.Outputs.GetAliasByIndex(i))
-        return outputs  # Returns a list of open worksheet filenames
+            _outputs.append(self.__obj.Outputs.GetAliasByIndex(i))
+        return _outputs  # Returns a list of open worksheet filenames
 
     def activate(self):
         """ activates the worksheet object """
@@ -130,17 +130,26 @@ class Worksheet(object):
         pass
         self.Name = self.__mcadapp.ActiveWorksheet.Name
 
-    def set_real_input(self, input_alias, value, units):
+    def set_real_input(self, input_alias, value, units=""):
         """ Set the value of a numerical input range in the worksheet """
-        if input_alias in self.__obj.Inputs:
-            self.__obj.SetRealValue(str(input_alias), value, str(units))
+        if input_alias in self.inputs():  # Use inputs function to get list
+            error = self.__obj.SetRealValue(str(input_alias), value, str(units))
+            # COM command returns error count. 0 = everything set correctly
+        else:
+            print(f"{input_alias} is not a designated input field.\n\n" +
+                  f"Available Input fields:\n{self.inputs()}")
+        if error > 0:
+            print(f"\nWarning!\nerror setting '{input_alias}' value/units\n" +
+                  f"Check the '{self.__mcadapp.ActiveWorksheet.Name}' worksheet\n")
+        return error
 
 
 if __name__ == "__main__":
 
     TEST = os.path.join(os.getcwd(), "Test", "test.mcdx")
     MC = Mathcad(visible=True) # Open Mathcad with no GUI
-    MC.activate()
     WS = Worksheet(TEST)
     print(WS.inputs())
     print(WS.outputs())
+    a = WS.set_real_input("in_test", 2, "Blah")
+    print(a)
