@@ -3,7 +3,8 @@ A Python wrapper for the Mathcad Prime automation API
 
 ### Requirements
 Mathcad Prime 3+
-comtypes (Enthought)
+
+comtypes (https://github.com/enthought/comtypes)
 
 ### Features
 (TODO)
