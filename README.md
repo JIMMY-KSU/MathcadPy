@@ -12,10 +12,10 @@ comtypes (Enthought)
 (TODO)
 
 ### Todo
-Project aim is a package release on PyPi.
 - [x] Implement basic API wrapper
 - [ ] Wiki documenting the functions
 - [ ] Complete API wrapper, All functions working
+- [ ] Release on PyPi.
 - [ ] Add value adding functionality. Small functions for common tasks etc.
 - [ ] Initial merge to master for first working version release
 - [ ] Create listener script (recieves and sends messages, uses Mathcad as an intermediary)
