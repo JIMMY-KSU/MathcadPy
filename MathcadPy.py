@@ -12,14 +12,8 @@ comtypes (https://github.com/enthought/comtypes)
 """
 
 import os
-
-try:  # Check that dependencies are importable
-    import comtypes.client as CC
-    import numpy as np
-except:
-    print("Not all required dependencies are installed")
-    print("comtypes and numpy are required")
-    quit()  # Stop script
+import comtypes.client as CC
+import numpy as np
 
 
 class Mathcad(object):
@@ -48,7 +42,14 @@ class Mathcad(object):
         else:
             return name
 
-    def worksheets(self):
+    def worksheet_names(self):
+        """ lists worksheets open in the Mathcad instance """
+        worksheets = []
+        for i in range(self.__mcadapp.Worksheets.Count):  # no. of open sheets
+            worksheets.append(self.__mcadapp.Worksheets.Item(i).Name)
+        return worksheets  # Returns a list of open worksheet filenames
+
+    def worksheet_paths(self):
         """ lists worksheets open in the Mathcad instance """
         worksheets = []
         for i in range(self.__mcadapp.Worksheets.Count):  # no. of open sheets
@@ -78,12 +79,17 @@ class Worksheet(object):
         self.__mcadapp = CC.CreateObject("MathcadPrime.Application")
         self.__ws_at_init = {}
         for i in range(self.__mcadapp.Worksheets.Count):
-            self.__ws_at_init[self.__mcadapp.Worksheets.Item(i).Name] = self.__mcadapp.Worksheets.Item(i).FullName
+            self.__ws_at_init[self.__mcadapp.Worksheets.Item(i).Name] = \
+            (self.__mcadapp.Worksheets.Item(i).FullName,
+             self.__mcadapp.Worksheets.Item(i))
         if open_sheet_name is not None:
-            for n, path in self.__ws_at_init.items():
+            for n, (path, __mcobj) in self.__ws_at_init.items():
                 if open_sheet_name == n:
                     self.__mcadapp.Open(path)
-                    self.__obj = self.__mcadapp.ActiveWorksheet  # Fetches COM worksheet object
+                    # Doesn't really open as it is already open
+                    # @TODO - change to activate worksheet by same name
+                    self.__obj = __mcobj
+                    #self.__obj = self.__mcadapp.ActiveWorksheet.Name  # Fetches COM worksheet object
                     self.Name = self.__obj.Name
                     break
             else:
@@ -92,7 +98,13 @@ class Worksheet(object):
             if os.path.isfile(filepath) and os.path.exists(filepath):
                 try:
                     self.__mcadapp.Open(filepath)
-                    self.__obj = self.__mcadapp.ActiveWorksheet
+                    # The below method has to be used because ActiveWorksheet
+                    # only returns an IMathcadPrimeWorksheet object. This does
+                    # Not have all of the required methods
+                    for i in range(self.__mcadapp.Worksheets.Count):
+                        if self.__mcadapp.Worksheets.Item(i).Name == self.__mcadapp.ActiveWorksheet.Name:
+                            self.__obj = self.__mcadapp.Worksheets.Item(i)  # Returns IMathcadPrimeWorksheet2 object
+                            break
                 except:
                     print(f"Error opening {filepath}")
 
@@ -148,6 +160,10 @@ class Worksheet(object):
         """ Resumes the worksheets calculation """
         self.__obj.ResumeCalculation()
 
+    def get_input(self, input_alias):
+        getinput = self.__obj.InputGetRealValue(input_alias)
+        return getinput.RealResult, getinput.Units, getinput.ErrorCode
+
     def inputs(self):
         """ returns a list of the designated input fields in the worksheet """
         _inputs = []
@@ -164,7 +180,7 @@ class Worksheet(object):
 
     def create_matrix(self, rows, cols):
         """ Creates an empty Mathcad matrix of dimensions cols*rows """
-        matrix_object = Matrix.create_matrix(rows, cols)
+        matrix_object = Matrix().create_matrix(rows, cols)
         return matrix_object
 
     def set_real_input(self, input_alias, value, units=""):
@@ -214,7 +230,10 @@ class Matrix(object):
     # Keeps methods inside Matrix class for OOP
     def __init__(self, python_name=""):
         self.__mcadapp = CC.CreateObject("MathcadPrime.Application")
-        self.__ws = self.__mcadapp.ActiveWorksheet
+        for i in range(self.__mcadapp.Worksheets.Count):
+            if self.__mcadapp.Worksheets.Item(i).Name == self.__mcadapp.ActiveWorksheet.Name:
+                self.__ws = self.__mcadapp.Worksheets.Item(i)  # Returns IMathcadPrimeWorksheet2 object
+                break
         self.python_name = python_name  # Just for organisation in scripts
         self.object = None
 
@@ -223,13 +242,12 @@ class Matrix(object):
         try:
             rows, columns = int(rows), int(columns)
             self.shape = (rows, columns)
-            #print(self.__ws.Name)
             self.object = self.__ws.CreateMatrix(rows, columns)
             return self.object
         except ValueError:
             raise ValueError("Matrix dimensions must be integers")
-#        except:
-#            raise Exception("COM Error creating Mathcad matrix")
+        except:
+            raise Exception("COM Error creating Mathcad matrix")
 
     def set_element(self, row_index, column_index, value):
         if self.object is not None:
@@ -238,8 +256,8 @@ class Matrix(object):
                 self.object.SetMatrixElement(row, col, value)
             except ValueError:
                 raise ValueError("Matrix dimensions must be integers")
-            except:
-                raise Exception("COM Error setting element value")
+#            except:
+#                raise Exception("COM Error setting element value")
         else:
             raise TypeError("Matrix must first be created")
 
@@ -247,11 +265,12 @@ class Matrix(object):
         """ Takes a numpy array, creates a matrix, and populates the values """
         if isinstance(numpy_array, np.ndarray):
             height, width = numpy_array.shape  # Get array dimensions
-            matrix_object = self.create_matrix(height, width)
+            matrix_object = self.create_matrix(width, height)
             self.object = matrix_object
             for r, row in enumerate(numpy_array):
                 for c, value in enumerate(row):
-                    self.set_element(r, c, value)
+                    print(f"row={r}   col={c}   value={value}")
+                    self.set_element(r+1, c+1, value)
         else:
             raise TypeError("Argument is not a Numpy array")
 
@@ -259,9 +278,10 @@ class Matrix(object):
 if __name__ == "__main__":
     TEST = os.path.join(os.getcwd(), "Test", "test.mcdx")
     MC = Mathcad(visible=True) # Open Mathcad with no GUI
-    WS = Worksheet(TEST)
+    #WS = Worksheet(TEST)
+    WS = Worksheet(None, "test")
     a = WS.set_real_input("in_test", 2, "mm")
     print(a)
-    print(WS.readonly())
-    array = np.array([[1, 2], [3, 4]])
-    matrix = Matrix().numpy_array_as_matrix(array)
+    nparray = np.array([[1, 2],[3,4],[5,6]])
+    matrix = Matrix().numpy_array_as_matrix(nparray)
+
