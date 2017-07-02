@@ -2,9 +2,8 @@
 A Python wrapper for the Mathcad Prime automation API
 
 ### Requirements
-(TODO)
-Mathcad Prime
-PyWin32 tools (currently, considering changing to enthoughts COMTOOLS)
+Mathcad Prime 3+
+comtypes (Enthought)
 
 ### Features
 (TODO)
@@ -14,7 +13,9 @@ PyWin32 tools (currently, considering changing to enthoughts COMTOOLS)
 
 ### Todo
 Project aim is a package release on PyPi.
-- [ ] Complete API wrapper
+- [x] Implement basic API wrapper
+- [ ] Wiki documenting the functions
+- [ ] Complete API wrapper, All functions working
 - [ ] Add value adding functionality. Small functions for common tasks etc.
 - [ ] Initial merge to master for first working version release
 - [ ] Create listener script (recieves and sends messages, uses Mathcad as an intermediary)
