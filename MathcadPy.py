@@ -13,8 +13,10 @@ comtypes (https://github.com/enthought/comtypes)
 
 import os
 import comtypes.client as CC
+import comtypes
 import numpy as np
 
+print(comtypes.gen)
 
 class Mathcad(object):
     """ Mathcad application object """
@@ -125,10 +127,22 @@ class Worksheet(object):
         else:
             print("incorrect save argument specified")
 
-    def save_as(self):
+    def save_as(self, new_filepath):
         """ Saves the worksheet under a new filename """
-        pass
-        self.Name = self.__mcadapp.ActiveWorksheet.Name
+        try:
+            path = str(new_filepath)
+            if os.path.isdir() and os.path.exists():
+                self.__obj.SaveAs(path)
+                return True
+            else:
+                raise ValueError("the argument for new_filepath is invalid")
+                return False
+        except TypeError:
+            raise TypeError("new_filepath must be a string")
+            return False
+        except:
+            print("COM error saving new version")
+            return False
 
     def name(self):
         """ Returns the filename of the Worksheet object """
@@ -180,6 +194,44 @@ class Worksheet(object):
             _outputs.append(self.__obj.Outputs.GetAliasByIndex(i))
         return _outputs  # Returns a list of open worksheet filenames
 
+    def get_real_output(self, output_alias, units="Default"):
+        try:
+            output_alias = str(output_alias)
+            units = str(units)
+            if output_alias in self.outputs():
+                try:
+                    if units == "Default":
+                        self.__obj.OutputGetRealValue(output_alias)
+                    else:
+                        self.__obj.OutputGetRealValueAs(output_alias, units)
+                except:
+                    print("COM Error fetching real_output")
+            else:
+                raise ValueError(f"{output_alias} is not a designated output field" +
+                                 f"\n\nAvailable Output fields:\n{self.outputs()}")
+        except TypeError:
+            raise TypeError("Arguments must be strings")
+
+    def get_matrix_output(self, output_alias, units="Default"):
+        try:
+            output_alias = str(output_alias)
+            units = str(units)
+            if output_alias in self.outputs():
+                try:
+                    if units == "Default":
+                        result = self.__obj.OutputGetMatrixValue(output_alias)
+                    else:
+                        result = self.__obj.OutputGetMatrixValueAs(output_alias, units)
+                    return result.MatrixResult, result.Units, result.ErrorCode
+                except:
+                    print("COM Error fetching real_output")
+            else:
+                raise ValueError(f"{output_alias} is not a designated output field" +
+                                 f"\n\nAvailable Output fields:\n{self.outputs()}")
+        except TypeError:
+            raise TypeError("Arguments must be strings")
+
+
     def set_real_input(self, input_alias, value, units=""):
         """ Set the value of a numerical input range in the worksheet """
         if input_alias in self.inputs():  # Use inputs function to get list
@@ -219,6 +271,9 @@ class Worksheet(object):
             print(f"\nWarning!\nerror setting '{input_alias}' value/units\n" +
                   f"Check the '{self.__mcadapp.ActiveWorksheet.Name}' worksheet\n")
         return error
+
+    def syncronize(self):
+        self.__obj.Synchronize()
 
 
 class Matrix(object):
@@ -289,13 +344,12 @@ class Matrix(object):
 if __name__ == "__main__":
     TEST = os.path.join(os.getcwd(), "Test", "test.mcdx")
     MC = Mathcad(visible=True) # Open Mathcad with no GUI
-    #WS = Worksheet(TEST)
+    WS = Worksheet(TEST)
     WS = Worksheet(None, "test")
     a = WS.set_real_input("in_test", 2, "mm")
     print(a)
-    nparray = np.array([[1, 2],[3,4],[5,6]])
-    matrix = Matrix()
-    a = matrix.numpy_array_as_matrix(nparray)
-    print(a)
+    matrix, units, error = WS.get_matrix_output("out_999")
+    print(error)
+    matrix.
 
 
