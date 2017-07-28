@@ -14,10 +14,21 @@ comtypes (https://github.com/enthought/comtypes)
 """
 
 import zipfile
-from pathlib import Path
+import pathlib
 
 
-def __open_mcdx(filepath):
+def _open_mcdx(filepath):
+    try:
+        iszip = zipfile.is_zipfile(filepath)
+        extension = pathlib.PurePath(filepath).suffix
+        if iszip and extension.lower() == ".mcdx":
+            print(zipfile.ZipFile(filepath).printdir())
+        else:
+            raise TypeError("This module can only open .mcdx files")
+            return False
+    except IOError:
+        print("Incorrect filepath")
+        return False
 
 
 class document(object):
@@ -28,18 +39,18 @@ class document(object):
     TODO - Create files from scratch
     """
     def __init__(self, filename=None):
+        self.filename = filename
         if filename == None:
             self.filename == None
-        elif filename != None and not Path(filename).is_file():
+        elif filename != None and not pathlib.Path(filename).is_file():
             raise IOError("The filename does not exist\n'{}'\n".format(filename) +
                           "to create a new file use document()")
             self.filename == None
         else:
-            self.filename == filename
+            _open_mcdx(self.filename)
 
-    def __open(self, filename=self.filename):
-        if filename == None:
-            return False
-        else:
 
-document("C:\Z")
+if __name__ == "__main__":
+
+    testpath = r"C:\Users\Matt\Documents\GitHub\MathcadPy\Test\Layout_test.mcdx"
+    document(testpath)
