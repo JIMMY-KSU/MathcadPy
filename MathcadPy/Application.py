@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-MathcadPy.py
+MathcadPy
+|
+|- Application.py
 
 Author: MattWoodhead
 
