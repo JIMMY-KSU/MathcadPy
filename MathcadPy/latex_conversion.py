@@ -50,13 +50,14 @@ __functions = { "sin" : r"\sin",
 functions = namedtuple("Units", __functions.keys())(**__functions)
 
 __units = {"millimeter" : "mm",
-    	   "meter"	: "m",
-          "seconds" : "s",
-    	   "minutes" : "min",
-    	   "hours" : "h",
-    	   "kilogram" : "kg",
-    	   "newton" : "N"
-          }
+    	    "meter"	: "m",
+           "seconds" : "s",
+    	    "minutes" : "min",
+     	    "hours" : "h",
+      	    "kilogram" : "kg",
+     	    "newton" : "N",
+           "degree": "deg",
+           }
 
 units = namedtuple("Units", __units.keys())(**__units)
 
