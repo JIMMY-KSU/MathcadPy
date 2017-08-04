@@ -17,7 +17,50 @@ import zipfile as zf
 import pathlib
 import os
 import xml.etree.ElementTree as XMLET
+from collections import namedtuple
 
+# Unicode maths symbols and their xml equivalents
+# TODO check these are correct!
+__symbols = {'&amp;': r'\&',
+             'π': r'\pi ',
+             'α': r'\alpha ',
+             'β': r'\beta',
+             'γ': r'gamma',
+             '': r'\epsilon ',  # silly latex
+             'ε': r'\varepsilon ',  # This is epsilon!!
+             'φ': r'\phi ',
+             'θ': r'\theta ',
+             'ρ': r'\rho ',
+             'µ': r'\mu ',
+             '∆': r'\Delta ',
+             'ϕ': r'\Phi ',
+             '⇕': r'\Updownarrow ',
+             '⇔': r'\Leftrightarrow ',
+             'ω': r'\omega',
+             'Ω': r'\Omega',
+             '&': r'\&'
+             }
+
+symbols = namedtuple("Units", __symbols.keys())(**__symbols)
+
+__functions = { "sin" : r"\sin",
+               "cos" : r"\cos",
+               "tan" : r"\tan",
+               "cot" : r"\cot",
+               }
+
+functions = namedtuple("Units", __functions.keys())(**__functions)
+
+__units = {"millimeter" : "mm",
+    	   "meter"	: "m",
+          "seconds" : "s",
+    	   "minutes" : "min",
+    	   "hours" : "h",
+    	   "kilogram" : "kg",
+    	   "newton" : "N"
+          }
+
+units = namedtuple("Units", __units.keys())(**__units)
 
 class _MathcadFile(object):
     """
